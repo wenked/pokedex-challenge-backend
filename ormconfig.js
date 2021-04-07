@@ -17,4 +17,10 @@ module.exports = {
 		migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
 		subscribersDir: process.env.TYPEORM_SUBSCRIBERS_DIR,
 	},
+	ssl: {
+		rejectUnauthorized: false,
+	},
+	driver: {
+		extra: process.env.TYPEORM_DRIVER_EXTRA,
+	},
 };
