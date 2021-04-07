@@ -1,69 +1,24 @@
 import { Request, Response } from 'express';
 import { Pokemon } from '../entity/Pokemon';
 import axios from 'axios';
-
-interface pokeListApiResponse {
-	count: number;
-	next: string;
-	previous: string | null;
-	results: {
-		name: string;
-		url: string;
-	};
-}
-
-interface pokeList {
-	name: string;
-	url: string;
-}
-
-interface pokeApiResponse {
-	base_experience: number;
-	height: number;
-	id: number;
-	name: string;
-	weight: number;
-	sprites: {
-		front_default: string;
-	};
-	abilities: [
-		{
-			ability: {
-				name: string;
-				url: string;
-			};
-		}
-	];
-	stats: [
-		{
-			base_stat: 48;
-			stat: {
-				name: string;
-			};
-		}
-	];
-	types: [
-		{
-			slot: number;
-			type: {
-				name: string;
-				url: string;
-			};
-		}
-	];
-}
+import {
+	pokeListApiResponse,
+	pokeList,
+	pokeApiResponse,
+} from '../types/pokeTypes';
 
 export const getPokemons = async (req: Request, res: Response) => {
 	const { limit, offset } = req.query;
 
 	try {
-		const pokemonApiResponse = await axios.get(
+		const ApiRes = await axios.get(
 			`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
 		);
+		console.log(res);
+		const pokemonApi = ApiRes.data as pokeListApiResponse;
 
-		console.log(pokemonApiResponse);
 		const savedPokemons = await Promise.all(
-			pokemonApiResponse.data.results.map(async (poke: pokeList) => {
+			pokemonApi.results.map(async (poke: pokeList) => {
 				const pokeFromDb = await Pokemon.findOne({
 					where: { name: poke.name },
 				});
@@ -100,7 +55,12 @@ export const getPokemons = async (req: Request, res: Response) => {
 			})
 		);
 		console.log(savedPokemons);
-		return res.status(200).json({ pokemons: savedPokemons });
+		return res.status(200).json({
+			count: pokemonApi.count,
+			previous: pokemonApi.previous,
+			next: pokemonApi.next,
+			pokemons: savedPokemons,
+		});
 	} catch (err) {
 		console.log(err);
 		return res.status(400).json({ error: 'Something went wrong' });
