@@ -14,7 +14,7 @@ export const getPokemons = async (req: Request, res: Response) => {
 		const ApiRes = await axios.get(
 			`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
 		);
-		console.log(res);
+
 		const pokemonApi = ApiRes.data as pokeListApiResponse;
 
 		const savedPokemons = await Promise.all(
@@ -54,7 +54,7 @@ export const getPokemons = async (req: Request, res: Response) => {
 				return formatedPokemonDB;
 			})
 		);
-		console.log(savedPokemons);
+
 		return res.status(200).json({
 			count: pokemonApi.count,
 			previous: pokemonApi.previous,
